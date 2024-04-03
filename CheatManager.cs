@@ -42,9 +42,54 @@ namespace PixelGunCheat
             if (gameController == null) return;
             if (player == null) return;
             player.MaxBackpackAmmo();
+            
+            // Ammo and Reloads
+            WeaponSounds weaponSounds = FindObjectsOfType<WeaponSounds>().ToList().Find(s => s.prop_Player_move_c_0.nickLabel.text == player.nickLabel.text);
+            if (weaponSounds != null)
+            {
+                // No Recoil
+                weaponSounds.recoilCoeff = 0;
+                weaponSounds.recoilCoeffZoom = 0;
+
+                // Max Speed + Full Auto
+                weaponSounds.shootDelay = 0.000001f;
+                weaponSounds.bulletDelay = 0.000001f;
+                weaponSounds.delayInBurstShooting = 0.000001f;
+                weaponSounds.chargeTime = 0.000001f;
+
+                // Instant ADS and XRAY
+                weaponSounds.scopeSpeed = 0;
+                weaponSounds.zoomXray = true;
+
+                // Unlimited Ammo
+                ItemRecord itemRecord = weaponSounds.prop_ItemRecord_0;
+                if (itemRecord != null)
+                {
+                    itemRecord.isUnlimitedAmmo = true;
+                    itemRecord.modulesClipAmmoModifier = 99999;
+                }
+            }
 
             Camera main = Camera.main;
             if (main == null) return;
+            
+            // Drop TP
+            foreach (var coinBonus in FindObjectsOfType<CoinBonus>())
+            {
+                coinBonus.transform.position = main.transform.position;
+            }
+            foreach (var armorBonus in FindObjectsOfType<ArmorBonus>())
+            {
+                armorBonus.transform.position = main.transform.position;
+            }
+            foreach (var itemBonus in FindObjectsOfType<BonusItem>())
+            {
+                itemBonus.transform.position = main.transform.position;
+            }
+            foreach (var weaponBonus in FindObjectsOfType<WeaponBonus>())
+            {
+                weaponBonus.transform.position = main.transform.position;
+            }
 
             Vector3 aimPos = main.transform.position;
             Player_move_c target = null;
