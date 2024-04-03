@@ -18,6 +18,7 @@ namespace PixelGunCheat
         private bool _initMat = false;
         private ManualLogSource logger = Logger.CreateLogSource("Cheat");
         private Vector3 aimedPos = Vector3.zero;
+        private Dictionary<string, Vector3> oldPos = new();
 
         private void Awake()
         {
@@ -92,6 +93,7 @@ namespace PixelGunCheat
             }
 
             Vector3 aimPos = main.transform.position;
+            Vector3 prediction = Vector3.zero;
             Player_move_c target = null;
             double distance = double.MaxValue;
             foreach (var p in playerList)
@@ -100,7 +102,15 @@ namespace PixelGunCheat
                 if(!(p.nickLabel.color.r == 1 && p.nickLabel.color.g == 0 && p.nickLabel.color.b == 0)) continue;
                 if(!PlayerUtil.IsVisible(PlayerUtil.WorldToScreenPoint(main, p.transform.position))) continue;
 
-                Vector3 headPos = p.transform.position + new Vector3(0, 0.75f, 0);
+                Vector3 velocity = Vector3.zero;
+                if (oldPos.ContainsKey(p.nickLabel.text))
+                {
+                    velocity = p.transform.position - oldPos[p.nickLabel.text];
+                }
+
+                oldPos[p.nickLabel.text] = p.transform.position;
+
+                Vector3 headPos = p.transform.position + new Vector3(0, 0.75f, 0) + (velocity.normalized / 5);
                 
                 if(Vector3.Distance(headPos, aimPos) > 600) continue;
 
@@ -124,12 +134,13 @@ namespace PixelGunCheat
 
                 distance = newDist;
                 target = p;
+                prediction = velocity.normalized / 5;
             }
 
             if (target != null)
             {
-                main.transform.LookAt(target.transform.position + new Vector3(0, 0.75f, 0));
-                aimedPos = target.transform.position + new Vector3(0, 0.75f, 0);
+                main.transform.LookAt(target.transform.position + new Vector3(0, 0.75f, 0) + prediction);
+                aimedPos = target.transform.position + new Vector3(0, 0.75f, 0) + prediction;
             }
             else
             {
